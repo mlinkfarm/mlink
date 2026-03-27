@@ -122,7 +122,7 @@
   </div>
 
   <!-- 豬 = Swap -->
-  <div class="animal" onclick="action('Swap')">
+  <div class="animal" onclick="goSwap()">
     <img src="https://cdn-icons-png.flaticon.com/512/616/616416.png">
     <div class="tooltip-box">🐖 Swap<br>Trade mLINK instantly</div>
   </div>
@@ -182,6 +182,11 @@ function action(type) {
   // ex:
   // fetch('/api/' + type)
 }
+
+function goSwap() {
+  window.open("https://app.uniswap.org/explore/pools/ethereum/0xc9cf178d318835098bbac56bb516d0b2a15d6c3e", "_blank");
+}
+
 
 function goSponsor() {
   window.open("https://app.uniswap.org/explore/pools/ethereum/0xc9cf178d318835098bbac56bb516d0b2a15d6c3e", "_blank");
