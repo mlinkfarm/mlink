@@ -133,8 +133,8 @@
     <div class="tooltip-box">🐑 Liquidity<br>Provide LP & earn fees</div>
   </div>
 
-  <!-- 樹 = Governance -->
-  <div class="animal" onclick="action('Governance')">
+  <!-- 樹 = Governance -->  
+  <div class="animal" onclick="goSponsor()">    
     <img src="https://cdn-icons-png.flaticon.com/512/427/427735.png">
     <div class="tooltip-box">🌳 Sponsor<br>Join mLINK farm</div>
   </div>
@@ -179,9 +179,12 @@
 function action(type) {
   alert("You clicked: " + type);
 
-  // 👉 之後你可以接 WebUI API
   // ex:
   // fetch('/api/' + type)
+}
+
+function goSponsor() {
+  window.open("https://app.uniswap.org/explore/pools/ethereum/0xc9cf178d318835098bbac56bb516d0b2a15d6c3e", "_blank");
 }
 </script>
 
