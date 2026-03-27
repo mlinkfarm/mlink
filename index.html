@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ModernLink (mLINK)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)),
+        url('https://images.unsplash.com/photo-1500382017468-9049fed747ef');
+      background-size: cover;
+      background-position: center;
+      color: white;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 100px 20px 50px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    /* 動物按鈕區 */
+    .farm {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 40px;
+      padding: 50px;
+    }
+
+    .animal {
+      position: relative;
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .animal:hover {
+      transform: scale(1.2);
+    }
+
+    .animal img {
+      width: 100px;
+      height: 100px;
+    }
+
+    /* Hover tooltip */
+    .tooltip-box {
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 14px;
+      white-space: nowrap;
+      display: none;
+    }
+
+    .animal:hover .tooltip-box {
+      display: block;
+    }
+
+    /* 卡片 */
+    .feature-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      transition: 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>🌱 ModernLink (mLINK)</h1>
+  <p>The Future of DeFi Farming Ecosystem</p>
+</div>
+
+<!-- 動物互動區 -->
+<div class="farm">
+
+  <!-- 牛 = Staking -->
+  <div class="animal" onclick="action('Staking')">
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png">
+    <div class="tooltip-box">🐄 Staking<br>Stake mLINK to earn yield</div>
+  </div>
+
+  <!-- 雞 = Reward -->
+  <div class="animal" onclick="action('Reward')">
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616430.png">
+    <div class="tooltip-box">🐔 Reward<br>Claim farming rewards</div>
+  </div>
+
+  <!-- 豬 = Swap -->
+  <div class="animal" onclick="action('Swap')">
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616416.png">
+    <div class="tooltip-box">🐖 Swap<br>Trade mLINK instantly</div>
+  </div>
+
+  <!-- 羊 = Liquidity -->
+  <div class="animal" onclick="action('Liquidity')">
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616554.png">
+    <div class="tooltip-box">🐑 Liquidity<br>Provide LP & earn fees</div>
+  </div>
+
+  <!-- 樹 = Governance -->
+  <div class="animal" onclick="action('Governance')">
+    <img src="https://cdn-icons-png.flaticon.com/512/427/427735.png">
+    <div class="tooltip-box">🌳 Sponsor<br>Join mLINK farm</div>
+  </div>
+
+</div>
+
+<!-- 功能介紹 -->
+<div class="container mb-5">
+  <div class="row g-4">
+
+    <div class="col-md-4">
+      <div class="feature-card">
+        <h4>🌾 Yield Farming</h4>
+        <p>Stake mLINK and earn continuous passive income with our smart farming protocol.</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="feature-card">
+        <h4>🔥 Deflationary Token</h4>
+        <p>Built-in burn mechanism increases scarcity and long-term value.</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="feature-card">
+        <h4>⚡ Fast & Secure</h4>
+        <p>Powered by modern smart contract architecture with high efficiency.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  © 2026 ModernLink (mLINK) | Farm the Future 🌱
+</footer>
+
+<!-- JS -->
+<script>
+function action(type) {
+  alert("You clicked: " + type);
+
+  // 👉 之後你可以接 WebUI API
+  // ex:
+  // fetch('/api/' + type)
+}
+</script>
+
+</body>
+</html>
