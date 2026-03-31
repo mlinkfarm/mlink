@@ -1,11 +1,8 @@
 <!DOCTYPE html>
-
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ocean Fullscreen</title>
-
+<title>Ocean Holder - Text Only</title>
 <style>
 html, body {
   margin: 0;
@@ -25,141 +22,90 @@ body {
   background-attachment: fixed;    /* 手機/PC一致 */
 }
 
-/* 海水濾鏡（讓畫面更沉） */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: linear-gradient(to bottom, rgba(0,50,100,0.25), rgba(0,10,30,0.6));
+.address {
+  position: absolute;
+  transition: transform 2s linear, font-size 0.3s;
+  will-change: transform, font-size;
+  color: white;
+  text-align: center;
   pointer-events: none;
 }
-
-/* 生物 */
-.creature {
-  position: absolute;
-  text-align: center;
-  color: rgba(255,255,255,0.85);
-  font-size: 11px;
-}
-
-.creature img {
-  display: block;
-  filter: brightness(0.95) contrast(1.05);
-}
-
-/* 深度 */
-.bg { opacity: 0.25; filter: blur(1.5px); }
-.mid { opacity: 0.6; }
-.fg { opacity: 0.95; }
-
-/* 尺寸 */
-.small img { width: 40px; }
-.medium img { width: 80px; }
-.large img { width: 140px; }
-.whale img { width: 220px; }
-
-.name {
-  margin-top: 3px;
-}
 </style>
-
 </head>
-
 <body>
-
-<div class="overlay"></div>
+<div id="ocean"></div>
 
 <script>
-let W = window.innerWidth;
-let H = window.innerHeight;
+const CONTRACT = "0xd5A5eB143e911736333ae9A92A43F7e4f8b3a3d2";
+const APIKEY = "VZGTN66MH2E76D5V5JU56YSI6JDWGYYPQF";
 
-const creatures = [];
+const ADDRESSES = [
+  "0xb51ff2F65B935142aab32aBEfa1C0E29A4161D31",
+  "0xfe97278082697122adb4271e913c7847a3E68E8C",
+  "0x4B4958c4A9bc5D0a99f046946D66D85Ce75E2d68",
+  "0xe8dE3766543BD3835613c7B1aD91aB4Bc281D7ed",
+  "0xB9D3E79561eC41463348711813713959C52Dd221",
+  "0x2C7578f18a994eC057522e54C28f71CEFB76884e",
+  "0x2346b80A4E5F5101Bac9589e517d9eDa3bD07E32",
+  "0x0956e702365D6ee8fD59fb47774Dd56f1aF746f9"
+];
 
-function rand(min,max){ return Math.random()*(max-min)+min }
+const ocean = document.getElementById("ocean");
+let items = [];
 
-/* 視窗改變時更新（手機旋轉很重要） */
-window.onresize = () => {
-  W = window.innerWidth;
-  H = window.innerHeight;
+// 建立文字
+function createAddress(addr, balance){
+  const div = document.createElement("div");
+  div.className = "address";
+  div.innerText = addr.slice(0,10) + "...";
+  // 字體大小依 balance
+  const fontSize = Math.max(12, balance/13888);
+  div.style.fontSize = fontSize + "px";
+
+  ocean.appendChild(div);
+  items.push({div, fontSize});
 }
 
-/* 建立生物 */
-function create(name, img, size, layer, speedBase){
-  const el = document.createElement("div");
-  el.className = "creature " + size + " " + layer;
-  el.innerHTML = `<img src="${img}"><div class="name">${name}</div>`;
-  document.body.appendChild(el);
-
-  const c = {
-    el,
-    x: rand(0,W),
-    y: rand(0,H),
-    angle: rand(0,Math.PI*2),
-    speed: speedBase + Math.random()*0.3,
-    turn: rand(-0.01,0.01),
-    floatOffset: Math.random()*1000
-  };
-
-  creatures.push(c);
+// 隨機游動
+function animate(){
+  items.forEach(obj=>{
+    const x = Math.random() * (window.innerWidth - 50);
+    const y = Math.random() * (window.innerHeight - 20);
+    obj.div.style.transform = `translate(${x}px, ${y}px)`;
+  });
 }
+setInterval(animate, 3000);
 
-/* 真實圖片 */
-const fishImg = "https://upload.wikimedia.org/wikipedia/commons/3/3a/Coral_reef_fish.png";
-const sharkImg = "https://upload.wikimedia.org/wikipedia/commons/5/56/Blacktip_reef_shark.png";
-const whaleImg = "https://upload.wikimedia.org/wikipedia/commons/0/0c/Blue_whale.png";
-const shrimpImg = "https://upload.wikimedia.org/wikipedia/commons/6/6f/Shrimp.png";
-
-/* 生物生成 */
-for(let i=0;i<20;i++){
-  create("珊瑚魚", fishImg, "small", "mid", 0.5);
-}
-
-for(let i=0;i<6;i++){
-  create("礁魚", fishImg, "medium", "mid", 0.4);
-}
-
-create("磷蝦群", shrimpImg, "small", "bg", 0.3);
-create("礁鯊", sharkImg, "large", "fg", 0.6);
-create("藍鯨", whaleImg, "whale", "fg", 0.25);
-
-/* 動畫 */
-function update(time){
-
-  for(const c of creatures){
-
-    /* 平滑轉向 */
-    c.angle += c.turn;
-
-    if(Math.random()<0.005){
-      c.turn = rand(-0.01,0.01);
-    }
-
-    /* 移動 */
-    c.x += Math.cos(c.angle) * c.speed;
-    c.y += Math.sin(c.angle) * c.speed;
-
-    /* 水中漂浮 */
-    c.y += Math.sin(time*0.001 + c.floatOffset) * 0.3;
-
-    /* 環繞世界 */
-    if(c.x<0) c.x=W;
-    if(c.x>W) c.x=0;
-    if(c.y<0) c.y=H;
-    if(c.y>H) c.y=0;
-
-    /* 方向 */
-    c.el.style.transform =
-      `translate(${c.x}px,${c.y}px) rotate(${c.angle}rad)`;
-
+// 查 balance
+async function getBalance(address){
+  const url = `https://api.etherscan.io/v2/api?chainid=1&module=account&action=tokenbalance&contractaddress=${CONTRACT}&address=${address}&tag=latest&apikey=${APIKEY}`;
+  try{
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.status !== "1") return 0;
+    return Number(BigInt(data.result))/1e18;
+  } catch(e){
+    return 0;
   }
-
-  requestAnimationFrame(update);
 }
 
-update(0);
-</script>
+// 載入地址
+async function load(){
+  ocean.innerHTML = "";
+  items = [];
+  for(const addr of ADDRESSES){
+    const balance = await getBalance(addr);
+    createAddress(addr, balance);
+    await new Promise(r=>setTimeout(r,350));
+  }
+}
 
+// 即時刷新
+setInterval(load, 30000);
+
+// 初始
+load();
+
+</script>
 </body>
 </html>
