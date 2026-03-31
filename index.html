@@ -110,13 +110,13 @@
 <div class="farm">
 
   <!-- 牛 = Staking -->
-  <div class="animal" onclick="action('Staking')">
+  <div class="animal" onclick="goStaking()">
     <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png">
     <div class="tooltip-box">🐄 Staking<br>Stake mLINK to earn yield</div>
   </div>
 
   <!-- 雞 = Reward -->
-  <div class="animal" onclick="action('Reward')">
+  <div class="animal" onclick="goReward()">
     <img src="https://cdn-icons-png.flaticon.com/512/616/616430.png">
     <div class="tooltip-box">🐔 Reward<br>Claim farming rewards</div>
   </div>
@@ -182,6 +182,15 @@ function action(type) {
   // ex:
   // fetch('/api/' + type)
 }
+
+function goStaking() {
+  window.open("pages/ocean.html", "_blank");
+}
+
+function goReward() {
+  window.open("pages/bar.html", "_blank");
+}
+
 
 function goSwap() {
   window.open("https://app.uniswap.org/explore/pools/ethereum/0xc9cf178d318835098bbac56bb516d0b2a15d6c3e", "_blank");

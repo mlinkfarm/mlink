@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ocean Fullscreen</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Arial;
+}
+
+/* ✅ 真正滿框背景 */
+body {
+  background-image: url("https://images.unsplash.com/photo-1544551763-46a013bb70d5");
+  background-size: cover;          /* 關鍵 */
+  background-position: center;     /* 置中 */
+  background-repeat: no-repeat;
+  background-attachment: fixed;    /* 手機/PC一致 */
+}
+
+/* 海水濾鏡（讓畫面更沉） */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to bottom, rgba(0,50,100,0.25), rgba(0,10,30,0.6));
+  pointer-events: none;
+}
+
+/* 生物 */
+.creature {
+  position: absolute;
+  text-align: center;
+  color: rgba(255,255,255,0.85);
+  font-size: 11px;
+}
+
+.creature img {
+  display: block;
+  filter: brightness(0.95) contrast(1.05);
+}
+
+/* 深度 */
+.bg { opacity: 0.25; filter: blur(1.5px); }
+.mid { opacity: 0.6; }
+.fg { opacity: 0.95; }
+
+/* 尺寸 */
+.small img { width: 40px; }
+.medium img { width: 80px; }
+.large img { width: 140px; }
+.whale img { width: 220px; }
+
+.name {
+  margin-top: 3px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<script>
+let W = window.innerWidth;
+let H = window.innerHeight;
+
+const creatures = [];
+
+function rand(min,max){ return Math.random()*(max-min)+min }
+
+/* 視窗改變時更新（手機旋轉很重要） */
+window.onresize = () => {
+  W = window.innerWidth;
+  H = window.innerHeight;
+}
+
+/* 建立生物 */
+function create(name, img, size, layer, speedBase){
+  const el = document.createElement("div");
+  el.className = "creature " + size + " " + layer;
+  el.innerHTML = `<img src="${img}"><div class="name">${name}</div>`;
+  document.body.appendChild(el);
+
+  const c = {
+    el,
+    x: rand(0,W),
+    y: rand(0,H),
+    angle: rand(0,Math.PI*2),
+    speed: speedBase + Math.random()*0.3,
+    turn: rand(-0.01,0.01),
+    floatOffset: Math.random()*1000
+  };
+
+  creatures.push(c);
+}
+
+/* 真實圖片 */
+const fishImg = "https://upload.wikimedia.org/wikipedia/commons/3/3a/Coral_reef_fish.png";
+const sharkImg = "https://upload.wikimedia.org/wikipedia/commons/5/56/Blacktip_reef_shark.png";
+const whaleImg = "https://upload.wikimedia.org/wikipedia/commons/0/0c/Blue_whale.png";
+const shrimpImg = "https://upload.wikimedia.org/wikipedia/commons/6/6f/Shrimp.png";
+
+/* 生物生成 */
+for(let i=0;i<20;i++){
+  create("珊瑚魚", fishImg, "small", "mid", 0.5);
+}
+
+for(let i=0;i<6;i++){
+  create("礁魚", fishImg, "medium", "mid", 0.4);
+}
+
+create("磷蝦群", shrimpImg, "small", "bg", 0.3);
+create("礁鯊", sharkImg, "large", "fg", 0.6);
+create("藍鯨", whaleImg, "whale", "fg", 0.25);
+
+/* 動畫 */
+function update(time){
+
+  for(const c of creatures){
+
+    /* 平滑轉向 */
+    c.angle += c.turn;
+
+    if(Math.random()<0.005){
+      c.turn = rand(-0.01,0.01);
+    }
+
+    /* 移動 */
+    c.x += Math.cos(c.angle) * c.speed;
+    c.y += Math.sin(c.angle) * c.speed;
+
+    /* 水中漂浮 */
+    c.y += Math.sin(time*0.001 + c.floatOffset) * 0.3;
+
+    /* 環繞世界 */
+    if(c.x<0) c.x=W;
+    if(c.x>W) c.x=0;
+    if(c.y<0) c.y=H;
+    if(c.y>H) c.y=0;
+
+    /* 方向 */
+    c.el.style.transform =
+      `translate(${c.x}px,${c.y}px) rotate(${c.angle}rad)`;
+
+  }
+
+  requestAnimationFrame(update);
+}
+
+update(0);
+</script>
+
+</body>
+</html>
