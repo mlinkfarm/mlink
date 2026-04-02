@@ -2,7 +2,8 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>Ocean Holder - Text Only</title>
+<title>Ocean Holder - Address Fish</title>
+
 <style>
 html, body {
   margin: 0;
@@ -10,28 +11,37 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
 }
 
-/* ✅ 真正滿框背景 */
+/* 🌊 海底背景 */
 body {
   background-image: url("https://images.unsplash.com/photo-1544551763-46a013bb70d5");
-  background-size: cover;          /* 關鍵 */
-  background-position: center;     /* 置中 */
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;    /* 手機/PC一致 */
 }
 
-.address {
+/* 🐟 / 🐋 角色 */
+.fish {
   position: absolute;
-  transition: transform 2s linear, font-size 0.3s;
-  will-change: transform, font-size;
   color: white;
   text-align: center;
   pointer-events: none;
+  transition: transform linear 3s;
+  will-change: transform;
+  text-shadow: 0 0 6px rgba(0,0,0,0.6);
+}
+
+/* 🐋 鯨魚發光 */
+.whale {
+  text-shadow:
+    0 0 8px #00ffff,
+    0 0 14px #00ffff;
 }
 </style>
 </head>
+
 <body>
 <div id="ocean"></div>
 
@@ -51,61 +61,77 @@ const ADDRESSES = [
 ];
 
 const ocean = document.getElementById("ocean");
-let items = [];
+let fishes = [];
 
-// 建立文字
-function createAddress(addr, balance){
+/* 🐟 建立 ADDRESS 生物 */
+function createFish(address, balance) {
   const div = document.createElement("div");
-  div.className = "address";
-  div.innerText = addr.slice(0,10) + "...";
-  // 字體大小依 balance
-  const fontSize = Math.max(12, balance/13888);
-  div.style.fontSize = fontSize + "px";
+  div.className = "fish";
+
+  // ✅ 字體大小規則
+  const fontSize = Math.max(12, balance / 13888);
+
+  // ✅ 圖示規則
+  let emoji = "🐟";
+  if (balance >= 500000) {
+    emoji = "🐋";
+    div.classList.add("whale");
+  }
+
+  // ✅ ADDRESS 只顯示 7 個字
+  const shortAddr = address.slice(0, 7);
+
+  div.innerHTML = `
+    <div style="font-size:${fontSize}px">${emoji}</div>
+    <div style="font-size:11px">${shortAddr}</div>
+  `;
 
   ocean.appendChild(div);
-  items.push({div, fontSize});
+  fishes.push(div);
 }
 
-// 隨機游動
-function animate(){
-  items.forEach(obj=>{
-    const x = Math.random() * (window.innerWidth - 50);
-    const y = Math.random() * (window.innerHeight - 20);
-    obj.div.style.transform = `translate(${x}px, ${y}px)`;
+/* 🌊 游動 */
+function animate() {
+  fishes.forEach(div => {
+    const x = Math.random() * (window.innerWidth - 200);
+    const y = Math.random() * (window.innerHeight - 80);
+    div.style.transform = `translate(${x}px, ${y}px)`;
   });
 }
 setInterval(animate, 3000);
 
-// 查 balance
-async function getBalance(address){
-  const url = `https://api.etherscan.io/v2/api?chainid=1&module=account&action=tokenbalance&contractaddress=${CONTRACT}&address=${address}&tag=latest&apikey=${APIKEY}`;
-  try{
+/* 🔢 查 balance */
+async function getBalance(address) {
+  const url =
+    `https://api.etherscan.io/v2/api?chainid=1` +
+    `&module=account&action=tokenbalance` +
+    `&contractaddress=${CONTRACT}` +
+    `&address=${address}&tag=latest&apikey=${APIKEY}`;
+
+  try {
     const res = await fetch(url);
     const data = await res.json();
-    if(data.status !== "1") return 0;
-    return Number(BigInt(data.result))/1e18;
-  } catch(e){
+    if (data.status !== "1") return 0;
+    return Number(data.result) / 1e18;
+  } catch {
     return 0;
   }
 }
 
-// 載入地址
-async function load(){
+/* 🚀 載入 */
+async function load() {
   ocean.innerHTML = "";
-  items = [];
-  for(const addr of ADDRESSES){
+  fishes = [];
+
+  for (const addr of ADDRESSES) {
     const balance = await getBalance(addr);
-    createAddress(addr, balance);
-    await new Promise(r=>setTimeout(r,350));
+    createFish(addr, balance);
+    await new Promise(r => setTimeout(r, 300));
   }
 }
 
-// 即時刷新
 setInterval(load, 30000);
-
-// 初始
 load();
-
 </script>
 </body>
 </html>
