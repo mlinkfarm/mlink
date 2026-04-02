@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Ocean Holder - Text Only</title>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Arial;
+}
+
+body {
+  background-image: url("https://images.unsplash.com/photo-1544551763-46a013bb70d5");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.address {
+  position: absolute;
+  transition: transform 2s linear, font-size 0.3s;
+  will-change: transform, font-size;
+  color: white;
+  text-align: center;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="ocean"></div>
+
+<script>
+const CONTRACT = "0xd5A5eB143e911736333ae9A92A43F7e4f8b3a3d2";
+const APIKEY = "VZGTN66MH2E76D5V5JU56YSI6JDWGYYPQF";
+
+const ocean = document.getElementById("ocean");
+let items = [];
+
+// 建立文字
+function createAddress(addr, balance){
+  const div = document.createElement("div");
+  div.className = "address";
+  div.innerText = addr.slice(0,10) + "...";
+  const fontSize = Math.max(12, balance/13888);
+  div.style.fontSize = fontSize + "px";
+
+  ocean.appendChild(div);
+  items.push({div, fontSize});
+}
+
+// 隨機游動
+function animate(){
+  items.forEach(obj=>{
+    const x = Math.random() * (window.innerWidth - 50);
+    const y = Math.random() * (window.innerHeight - 20);
+    obj.div.style.transform = `translate(${x}px, ${y}px)`;
+  });
+}
+setInterval(animate, 3000);
+
+// 查 balance
+async function getBalance(address){
+  const url = `https://api.etherscan.io/v2/api?chainid=1&module=account&action=tokenbalance&contractaddress=${CONTRACT}&address=${address}&tag=latest&apikey=${APIKEY}`;
+  try{
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.status !== "1") return 0;
+    return Number(BigInt(data.result))/1e18;
+  } catch(e){
+    return 0;
+  }
+}
+
+// 抓 holder list
+async function getHolders(page = 1, offset = 50) {
+  // Etherscan V2 版 tokenholderlist endpoint
+  const url = `https://api.etherscan.io/v2/api?` +
+              `module=token&action=tokenholderlist` +
+              `&contractaddress=${CONTRACT}` +
+              `&page=${page}&offset=${offset}` +
+              `&apikey=${APIKEY}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    // V2 版成功 status 通常是 "1"
+    if (data.status !== "1" || !data.result) return [];
+
+    // 將 holder 地址回傳
+    return data.result.map(h => h.TokenHolderAddress);
+  } catch (e) {
+    console.error("getHolders error:", e);
+    return [];
+  }
+}
+
+// 載入 holder
+async function load(){
+  ocean.innerHTML = "";
+  items = [];
+  const addresses = await getHolders(1, 50); // 第一頁 50 個 holder
+  for(const addr of addresses){
+    const balance = await getBalance(addr);
+    if(balance > 0){
+      createAddress(addr, balance);
+    }
+    await new Promise(r=>setTimeout(r, 200)); // 避免 API 過快
+  }
+}
+
+// 即時刷新
+setInterval(load, 30000);
+
+// 初始
+load();
+
+</script>
+</body>
+</html>
