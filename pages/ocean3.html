@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Ocean Whale View</title>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  font-family: Arial;
+}
+
+/* 🌊 海底背景 */
+body {
+  background-image: url("https://images.unsplash.com/photo-1544551763-46a013bb70d5");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* 🐟 魚 */
+.fish {
+  position: absolute;
+  transition: transform linear;
+  will-change: transform;
+  pointer-events: none;
+  text-align: center;
+  color: white;
+}
+
+/* 🐋 whale特效 */
+.whale {
+  filter: drop-shadow(0 0 10px #00ffff) brightness(1.5);
+}
+
+/* 📊 排行榜 */
+#leaderboard {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  color: #00ffff;
+  background: rgba(0,0,0,0.4);
+  padding: 10px;
+  font-size: 12px;
+  border-radius: 10px;
+}
+</style>
+</head>
+<body>
+
+<div id="ocean"></div>
+<div id="leaderboard">Loading...</div>
+
+<script>
+const CONTRACT = "0xd5A5eB143e911736333ae9A92A43F7e4f8b3a3d2";
+const APIKEY = "VZGTN66MH2E76D5V5JU56YSI6JDWGYYPQF";
+
+const ocean = document.getElementById("ocean");
+const leaderboard = document.getElementById("leaderboard");
+
+let fishes = [];
+
+// 🐟 建立魚
+function createFish(addr, balance){
+  const div = document.createElement("div");
+  div.className = "fish";
+
+  // 🎯 大小 (log scale)
+  const size = Math.max(20, Math.log10(balance + 1) * 15);
+
+  // 🐟 🐠 🐋 分級
+  let emoji = "🐟";
+  let speed = 4000;
+
+  if(balance > 100000){
+    emoji = "🐋";
+    div.classList.add("whale");
+    speed = 8000;
+  }else if(balance > 10000){
+    emoji = "🐠";
+    speed = 6000;
+  }
+
+  div.innerHTML = `
+    <div style="font-size:${size}px">${emoji}</div>
+    <div style="font-size:10px">${addr.slice(0,6)}...</div>
+  `;
+
+  ocean.appendChild(div);
+
+  fishes.push({div, speed});
+}
+
+// 🌊 游動
+function animate(){
+  fishes.forEach(f=>{
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+
+    f.div.style.transitionDuration = f.speed + "ms";
+    f.div.style.transform = `translate(${x}px, ${y}px)`;
+  });
+}
+setInterval(animate, 3000);
+
+// ⭐ V2 holders
+async function getHolders(page=1, offset=20){
+  const url = `https://api.etherscan.io/v2/api?chainid=1&module=token&action=tokenholderlist&contractaddress=${CONTRACT}&page=${page}&offset=${offset}&apikey=${APIKEY}`;
+  
+  try{
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.status !== "1") return [];
+
+    return data.result.map(h => ({
+      address: h.TokenHolderAddress,
+      balance: Number(h.TokenHolderQuantity) / 1e18
+    }));
+  }catch(e){
+    return [];
+  }
+}
+
+// 📊 排行榜
+function renderTop(holders){
+  const top = holders
+    .sort((a,b)=>b.balance-a.balance)
+    .slice(0,10);
+
+  leaderboard.innerHTML = "<b>🐋 Top Holders</b><br>";
+  top.forEach((h,i)=>{
+    leaderboard.innerHTML += `${i+1}. ${h.address.slice(0,6)}... (${Math.floor(h.balance)})<br>`;
+  });
+}
+
+// 🚀 載入
+async function load(){
+  ocean.innerHTML = "";
+  fishes = [];
+
+  let all = [];
+
+  const maxPages = 2;
+
+  for(let p=1; p<=maxPages; p++){
+    const holders = await getHolders(p,20);
+    all = all.concat(holders);
+
+    await new Promise(r=>setTimeout(r,350));
+  }
+
+  all.forEach(h=>{
+    createFish(h.address, h.balance);
+  });
+
+  renderTop(all);
+}
+
+// 每30秒刷新
+setInterval(load, 30000);
+
+load();
+</script>
+
+</body>
+</html>
