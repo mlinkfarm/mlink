@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>FatCat Farm</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ?? 農場背景 */
+body {
+  background-image: url("https://images.unsplash.com/photo-1500382017468-9049fed747ef");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ?? FatCat */
+.fatcat {
+  position: absolute;
+  pointer-events: none;
+  transition: transform linear 3s;
+  will-change: transform;
+}
+
+/* ?? 大戶發光 */
+.bigcat {
+  filter: drop-shadow(0 0 10px gold)
+          drop-shadow(0 0 20px orange);
+}
+</style>
+</head>
+
+<body>
+<div id="farm"></div>
+
+<script>
+const CONTRACT = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // WETH
+const APIKEY = "VZGTN66MH2E76D5V5JU56YSI6JDWGYYPQF";
+
+const ADDRESSES = [
+  "0x04cef1586bc001835a7Cbf1f172A31B1Bb2E1b48"
+];
+
+const farm = document.getElementById("farm");
+let cats = [];
+
+/* ?? 建立 FatCat */
+function createCat(weth) {
+  const img = document.createElement("img");
+  img.className = "fatcat";
+
+  // ??? 貓圖片（你可換自己的 NFT / meme）
+  img.src = "https://cdn-icons-png.flaticon.com/512/616/616411.png";
+
+  // ? 尺寸：0.1 WETH = 10px → 1 WETH = 100px
+  const size = Math.max(20, weth * 100);
+
+  img.style.width = size + "px";
+  img.style.height = size + "px";
+
+  // ?? 大戶發光
+  if (weth >= 5) {
+    img.classList.add("bigcat");
+  }
+
+  farm.appendChild(img);
+  cats.push(img);
+}
+
+/* ?? 隨機移動 */
+function animate() {
+  cats.forEach(cat => {
+    const x = Math.random() * (window.innerWidth - 200);
+    const y = Math.random() * (window.innerHeight - 200);
+    cat.style.transform = `translate(${x}px, ${y}px)`;
+  });
+}
+setInterval(animate, 3000);
+
+/* ?? 查 WETH */
+async function getBalance(address) {
+  const url =
+    `https://api.etherscan.io/v2/api?chainid=1` +
+    `&module=account&action=tokenbalance` +
+    `&contractaddress=${CONTRACT}` +
+    `&address=${address}&tag=latest&apikey=${APIKEY}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.status !== "1") return 0;
+    return Number(data.result) / 1e18;
+  } catch {
+    return 0;
+  }
+}
+
+/* ?? 載入 */
+async function load() {
+  farm.innerHTML = "";
+  cats = [];
+
+  for (const addr of ADDRESSES) {
+    const weth = await getBalance(addr);
+    createCat(weth);
+    await new Promise(r => setTimeout(r, 300));
+  }
+}
+
+setInterval(load, 30000);
+load();
+</script>
+</body>
+</html>
