@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>FatCat Farm</title>
+<title>Modern LINK Farm</title>
 
 <style>
 html, body {
@@ -13,7 +13,7 @@ html, body {
   overflow: hidden;
 }
 
-/* ?? 農場背景 */
+/* 農場背景 */
 body {
   background-image: url("https://images.unsplash.com/photo-1500382017468-9049fed747ef");
   background-size: cover;
@@ -21,7 +21,7 @@ body {
   background-repeat: no-repeat;
 }
 
-/* ?? FatCat */
+/* FatCat */
 .fatcat {
   position: absolute;
   pointer-events: none;
@@ -29,8 +29,20 @@ body {
   will-change: transform;
 }
 
-/* ?? 大戶發光 */
+/* FatDog */
+.fatdog {
+  position: absolute;
+  pointer-events: none;
+  transition: transform linear 3s;
+  will-change: transform;
+}
+
+/* 大戶發光 */
 .bigcat {
+  filter: drop-shadow(0 0 10px gold)
+          drop-shadow(0 0 20px orange);
+}
+.bigdog {
   filter: drop-shadow(0 0 10px gold)
           drop-shadow(0 0 20px orange);
 }
@@ -47,31 +59,58 @@ const APIKEY = "VZGTN66MH2E76D5V5JU56YSI6JDWGYYPQF";
 const ADDRESSES = [
   "0x04cef1586bc001835a7Cbf1f172A31B1Bb2E1b48"
 ];
+const ADDRESSES_DOG = [
+  "0x3ba148d6A8f4D9F243c495842E80542021401F8A"
+];
 
 const farm = document.getElementById("farm");
 let cats = [];
+let dogs = [];
 
-/* ?? 建立 FatCat */
+/* 建立 FatCat */
 function createCat(weth) {
   const img = document.createElement("img");
   img.className = "fatcat";
 
-  // ??? 貓圖片（你可換自己的 NFT / meme）
+  // 圖片
   img.src = "https://cdn-icons-png.flaticon.com/512/616/616430.png";
 
-  // ? 尺寸：0.1 WETH = 10px → 1 WETH = 100px
-  const size = Math.max(20, weth * 100);
+  // 尺寸：0.1 WETH = 10px → 1 WETH = 100px
+  const size = Math.max(10, weth * 100);
 
   img.style.width = size + "px";
   img.style.height = size + "px";
 
-  // ?? 大戶發光
+  // 大戶發光
   if (weth >= 5) {
     img.classList.add("bigcat");
   }
 
   farm.appendChild(img);
   cats.push(img);
+}
+
+/* 建立 FatDot */
+function createDog(weth) {
+  const img = document.createElement("img");
+  img.className = "fatdog";
+
+  // 圖片
+  img.src = "https://cdn-icons-png.flaticon.com/512/616/616408.png";
+
+  // 尺寸：0.1 WETH = 10px → 1 WETH = 100px
+  const size = Math.max(10, weth * 100);
+
+  img.style.width = size + "px";
+  img.style.height = size + "px";
+
+  // 大戶發光
+  if (weth >= 5) {
+    img.classList.add("bigdog");
+  }
+
+  farm.appendChild(img);
+  dogs.push(img);
 }
 
 /* ?? 隨機移動 */
@@ -81,6 +120,11 @@ function animate() {
     const y = Math.random() * (window.innerHeight - 200);
     cat.style.transform = `translate(${x}px, ${y}px)`;
   });
+  dogs.forEach(dog => {
+    const x = Math.random() * (window.innerWidth - 200);
+    const y = Math.random() * (window.innerHeight - 200);
+    dog.style.transform = `translate(${x}px, ${y}px)`;
+  });  
 }
 setInterval(animate, 3000);
 
@@ -106,12 +150,18 @@ async function getBalance(address) {
 async function load() {
   farm.innerHTML = "";
   cats = [];
+  dogs = [];
 
   for (const addr of ADDRESSES) {
     const weth = await getBalance(addr);
     createCat(weth);
     await new Promise(r => setTimeout(r, 300));
   }
+  for (const addr of ADDRESSES_DOG) {
+    const weth = await getBalance(addr);
+    createDog(weth);
+    await new Promise(r => setTimeout(r, 300));
+  }  
 }
 
 setInterval(load, 30000);
