@@ -52,10 +52,14 @@ const ADDRESSES_CAT = [
 const ADDRESSES_DOG = [
   "0x3ba148d6A8f4D9F243c495842E80542021401F8A"
 ];
+const ADDRESSES_PIG = [
+  "0x0c652f6507799894954A83BFEcA6cD113E3D5f34"
+];
 
 const ICONS = {
   cat: "https://cdn-icons-png.flaticon.com/512/616/616430.png",
-  dog: "https://cdn-icons-png.flaticon.com/512/616/616408.png"
+  dog: "https://cdn-icons-png.flaticon.com/512/616/616408.png",
+  pig: "https://cdn-icons-png.flaticon.com/512/616/616416.png"
 };
 
 const farm = document.getElementById("farm");
@@ -125,6 +129,11 @@ async function loadFarm() {
   );
   dogs.forEach(w => createAnimal("dog", w));
 
+  const pigs = await Promise.all(
+    ADDRESSES_PIG.map(getBalance)
+  );
+  pigs.forEach(w => createAnimal("pig", w));
+  
   animateAnimals();
 }
 
